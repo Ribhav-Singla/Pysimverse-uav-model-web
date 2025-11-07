@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MuJoCo Demo</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="application-name"   content="mujoco_wasm">
+        <meta name="description"        content="MuJoCo Testbed">
+        <meta name="keywords"           content="MuJoCo">
+        <meta name="author"             content="zalo">
+        <meta name="viewport"           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no, shrink-to-fit=0">
+        <meta name="theme-color"        content="#ffffff">
+        <link rel ="icon" type="image/x-icon" href="./examples/favicon.png">
+        <style>
+            #agent-selector {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 1000;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                font-family: Arial, sans-serif;
+                max-width: 300px;
+            }
+            #agent-selector h2 {
+                margin: 0 0 15px 0;
+                font-size: 18px;
+                color: #333;
+            }
+            #agent-selector label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                color: #555;
+                font-size: 14px;
+            }
+            #agent-selector select {
+                width: 100%;
+                padding: 8px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+            #agent-selector button {
+                width: 100%;
+                padding: 10px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            #agent-selector button:hover {
+                background-color: #45a049;
+            }
+            #agent-selector button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+            #loading-message {
+                margin-top: 10px;
+                color: #666;
+                font-size: 14px;
+                text-align: center;
+            }
+            .metadata-info {
+                margin-top: 15px;
+                padding: 10px;
+                background: rgba(240, 240, 240, 0.9);
+                border-radius: 4px;
+                font-size: 12px;
+                color: #666;
+            }
+            #project-description {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(255, 255, 255, 0.95);
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                font-family: Arial, sans-serif;
+                max-width: 600px;
+                text-align: center;
+            }
+            #project-description h1 {
+                margin: 0 0 20px 0;
+                font-size: 32px;
+                color: #2196F3;
+            }
+            #project-description p {
+                margin: 10px 0;
+                font-size: 16px;
+                color: #666;
+                line-height: 1.6;
+            }
+            #project-description .instructions {
+                margin-top: 30px;
+                padding: 20px;
+                background: rgba(240, 248, 255, 0.8);
+                border-radius: 8px;
+                border-left: 4px solid #2196F3;
+            }
+            #project-description .instructions h3 {
+                margin: 0 0 10px 0;
+                color: #2196F3;
+                font-size: 18px;
+            }
+            #project-description .instructions ol {
+                text-align: left;
+                margin: 10px 0;
+                padding-left: 20px;
+            }
+            #project-description .instructions li {
+                margin: 8px 0;
+                color: #555;
+            }
+        </style>
+    </head>
+
+    <body style="margin:0px; background-color:rgb(255, 255, 255); overflow:hidden; position:fixed; min-height: 100%;
+                 touch-action: none;
+                 -webkit-touch-callout: none; /* iOS Safari */
+                 -webkit-user-select: none; /* Safari */
+                 -khtml-user-select: none; /* Konqueror HTML */
+                 -moz-user-select: none; /* Old versions of Firefox */
+                 -ms-user-select: none; /* Internet Explorer/Edge */
+                 user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */">
+        <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
+
+        <!-- Project Description (shown on initial load) -->
+        <div id="project-description">
+            <h1>🚁 UAV Trajectory Visualization</h1>
+            <p>
+                A MuJoCo-based simulation environment for visualizing UAV navigation trajectories 
+                across different agent types and obstacle configurations.
+            </p>
+            <p>
+                Compare the performance of <strong>AR-PPO</strong>, <strong>Neurosymbolic</strong>, 
+                and <strong>Pure Neural</strong> agents as they navigate through environments 
+                with varying obstacle densities (1-15 obstacles).
+            </p>
+            <div class="instructions">
+                <h3>Getting Started</h3>
+                <ol>
+                    <li>Select an <strong>Agent Type</strong> from the dropdown</li>
+                    <li>Choose the <strong>Obstacle Count</strong> (1-15)</li>
+                    <li>Click <strong>Load Scene</strong> to visualize the environment</li>
+                    <li>Click <strong>Run Simulation</strong> to see the UAV trajectory</li>
+                </ol>
+                <p style="margin-top: 15px; font-style: italic; color: #2196F3;">
+                    Green dots will mark the path taken by the UAV during simulation.
+                </p>
+            </div>
+        </div>
+
+        <!-- Agent Selection UI -->
+        <div id="agent-selector">
+            <h2>Agent Environment Selector</h2>
+            <label for="agent-type">Agent Type:</label>
+            <select id="agent-type">
+                <option value="">-- Select Agent --</option>
+                <option value="AR_PPO">AR PPO</option>
+                <option value="Neurosymbolic">Neurosymbolic</option>
+                <option value="Pure_Neural">Pure Neural</option>
+            </select>
+            
+            <label for="obstacle-count">Obstacle Count:</label>
+            <select id="obstacle-count">
+                <option value="">-- Select Obstacle Count --</option>
+                <option value="1">1 Obstacle</option>
+                <option value="2">2 Obstacles</option>
+                <option value="3">3 Obstacles</option>
+                <option value="4">4 Obstacles</option>
+                <option value="5">5 Obstacles</option>
+                <option value="6">6 Obstacles</option>
+                <option value="7">7 Obstacles</option>
+                <option value="8">8 Obstacles</option>
+                <option value="9">9 Obstacles</option>
+                <option value="10">10 Obstacles</option>
+                <option value="11">11 Obstacles</option>
+                <option value="12">12 Obstacles</option>
+                <option value="13">13 Obstacles</option>
+                <option value="14">14 Obstacles</option>
+                <option value="15">15 Obstacles</option>
+            </select>
+            
+            <label for="simulation-speed">Simulation Speed:</label>
+            <select id="simulation-speed">
+                <option value="1">Very Fast (1x)</option>
+                <option value="3" selected>Normal (3x)</option>
+                <option value="5">Slow (5x)</option>
+                <option value="10">Very Slow (10x)</option>
+            </select>
+            
+            <button id="load-scene-btn" disabled>Load Scene</button>
+            <button id="run-simulation-btn" disabled style="margin-top: 10px; background-color: #2196F3;">Run Simulation</button>
+            <button id="stop-simulation-btn" disabled style="margin-top: 10px; background-color: #f44336;">Stop Simulation</button>
+            <div id="loading-message"></div>
+            <div id="simulation-status" style="margin-top: 10px; color: #2196F3; font-size: 14px; text-align: center;"></div>
+            <div id="metadata-display" class="metadata-info" style="display: none;"></div>
+        </div>
+
+		<!-- Import maps polyfill -->
+		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+        <!-- Allows three.js Examples to work without building -->
+        <script type="importmap">
+            { "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/"} }
+        </script>
+
+        <div id="appbody" style="position: absolute;">
+            <!--<div id="error"></div>
+            <script type="module" src="./examples/Debug.js"></script>-->
+            <script type="module" src="./examples/main.js"></script>
+        </div>
+    </body>
+</html>
