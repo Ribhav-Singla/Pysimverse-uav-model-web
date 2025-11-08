@@ -103,6 +103,9 @@ export class MuJoCoDemo {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.10;
     this.controls.screenSpacePanning = true;
+    // Prevent camera from going below the surface
+    this.controls.maxPolarAngle = Math.PI / 2; // 90 degrees - horizontal limit
+    this.controls.minPolarAngle = 0; // 0 degrees - can look straight down from above
     this.controls.update();
     
     // Add trajectory group to scene

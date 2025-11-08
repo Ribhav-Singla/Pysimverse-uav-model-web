@@ -25,8 +25,8 @@
     <geom name="start_pole" type="box" size="0.03 0.03 0.4" pos="3.0 3.0 0.4" rgba="0 1 0 1" />
     
     
-    <geom name="goal_marker" type="cylinder" size="0.15 0.05" pos="1.2923827196188906 -1.6482278667677823 0.05" rgba="0 0 1 0.8" />
-    <geom name="goal_pole" type="box" size="0.03 0.03 0.4" pos="1.2923827196188906 -1.6482278667677823 0.4" rgba="0 0 1 1" />
+    <geom name="goal_marker" type="cylinder" size="0.15 0.05" pos="-0.7410802674703048 1.9691488231403973 0.05" rgba="0 0 1 0.8" />
+    <geom name="goal_pole" type="box" size="0.03 0.03 0.4" pos="-0.7410802674703048 1.9691488231403973 0.4" rgba="0 0 1 1" />
     
     
     <body name="chassis" pos="3.0 3.0 1.0">
@@ -55,8 +55,8 @@
       <site name="motor3" pos="0.08 -0.08 0" size="0.01" />
       <site name="motor4" pos="-0.08 -0.08 0" size="0.01" />
     </body>
-    <geom name="test_obs_0" type="box" size="0.10172713734515734 0.0527049445426618 1.0" pos="-0.7778597022205403 -2.850084080001282 1.0" rgba="0.31059592307135 0.1918111588899067 0.15039702363973123 1.0" />
-    <geom name="test_obs_1" type="cylinder" size="0.059643267401958994 1.0" pos="1.065642082798992 -0.6938545115693153 1.0" rgba="0.3660246798470803 0.681042087111126 0.36795983714364144 1.0" />
+    <geom name="test_obs_0" type="box" size="0.07734925511251402 0.05042516907455243 1.0" pos="1.0974370592112965 -2.60225710994564 1.0" rgba="0.32021919841614377 0.8134903326102161 0.8552234826955887 1.0" />
+    <geom name="test_obs_1" type="cylinder" size="0.05753234757042326 1.0" pos="0.7733195017603787 -0.6254436218242277 1.0" rgba="0.7646507918694423 0.1518883691313241 0.6584420633112263 1.0" />
   <geom name="boundary_north" type="box" size="4.0 0.005 0.002" pos="0 4.0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_south" type="box" size="4.0 0.005 0.002" pos="0 -4.0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_east" type="box" size="0.005 4.0 0.002" pos="4.0 0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_west" type="box" size="0.005 4.0 0.002" pos="-4.0 0 0.002" rgba="1.0 0.0 0.0 1.0" /></worldbody>
 
   <actuator>

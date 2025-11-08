@@ -21,15 +21,15 @@
     <light name="light1" pos="0 0 4" dir="0 0 -1" diffuse="1 1 1" />
     
     
-    <geom name="start_marker" type="cylinder" size="0.15 0.05" pos="3.0 3.0 0.05" rgba="0 1 0 0.8" />
-    <geom name="start_pole" type="box" size="0.03 0.03 0.4" pos="3.0 3.0 0.4" rgba="0 1 0 1" />
+    <geom name="start_marker" type="cylinder" size="0.15 0.05" pos="-3.0 3.0 0.05" rgba="0 1 0 0.8" />
+    <geom name="start_pole" type="box" size="0.03 0.03 0.4" pos="-3.0 3.0 0.4" rgba="0 1 0 1" />
     
     
-    <geom name="goal_marker" type="cylinder" size="0.15 0.05" pos="-2.441885674031824 -1.5367182009240885 0.05" rgba="0 0 1 0.8" />
-    <geom name="goal_pole" type="box" size="0.03 0.03 0.4" pos="-2.441885674031824 -1.5367182009240885 0.4" rgba="0 0 1 1" />
+    <geom name="goal_marker" type="cylinder" size="0.15 0.05" pos="-2.075159359392167 -2.469921130947491 0.05" rgba="0 0 1 0.8" />
+    <geom name="goal_pole" type="box" size="0.03 0.03 0.4" pos="-2.075159359392167 -2.469921130947491 0.4" rgba="0 0 1 1" />
     
     
-    <body name="chassis" pos="3.0 3.0 1.0">
+    <body name="chassis" pos="-3.0 3.0 1.0">
       <joint type="free" name="root" />
       <geom type="box" size="0.12 0.12 0.02" rgba="1.0 0.0 0.0 1.0" mass="0.8" />
       
@@ -55,9 +55,9 @@
       <site name="motor3" pos="0.08 -0.08 0" size="0.01" />
       <site name="motor4" pos="-0.08 -0.08 0" size="0.01" />
     </body>
-    <geom name="test_obs_0" type="cylinder" size="0.09094194280123341 1.0" pos="-2.8162288997738463 1.1604560285803767 1.0" rgba="0.840965635666878 0.6809057887145952 0.38897683352167456 1.0" />
-    <geom name="test_obs_1" type="cylinder" size="0.06639700463427045 1.0" pos="1.273505651210013 1.1457474137104926 1.0" rgba="0.2166332374262323 0.7525464634440182 0.813290134682638 1.0" />
-    <geom name="test_obs_2" type="box" size="0.09024045157974918 0.06815494409872162 1.0" pos="-1.2331817393333218 2.6086301140122505 1.0" rgba="0.5327388451162014 0.2118311150410576 0.2529277491262448 1.0" />
+    <geom name="test_obs_0" type="cylinder" size="0.0794496790557809 1.0" pos="-3.2535848347125635 -3.4131902904050486 1.0" rgba="0.4302371547134517 0.5457852135237056 0.5475862226231828 1.0" />
+    <geom name="test_obs_1" type="box" size="0.06933813713783692 0.09991537232513331 1.0" pos="-1.054556502015483 0.8037382827824235 1.0" rgba="0.7662993459395911 0.3318016484187557 0.5449003975983999 1.0" />
+    <geom name="test_obs_2" type="box" size="0.09927885743798474 0.10467791138067802 1.0" pos="2.5045641755673853 -0.9117327312625553 1.0" rgba="0.44074746447863633 0.2324618667177573 0.16390450054144756 1.0" />
   <geom name="boundary_north" type="box" size="4.0 0.005 0.002" pos="0 4.0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_south" type="box" size="4.0 0.005 0.002" pos="0 -4.0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_east" type="box" size="0.005 4.0 0.002" pos="4.0 0 0.002" rgba="1.0 0.0 0.0 1.0" /><geom name="boundary_west" type="box" size="0.005 4.0 0.002" pos="-4.0 0 0.002" rgba="1.0 0.0 0.0 1.0" /></worldbody>
 
   <actuator>
