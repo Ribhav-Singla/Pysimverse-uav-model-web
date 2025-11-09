@@ -111,7 +111,7 @@
                 justify-content: center;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
                 text-align: center;
-                padding: 8rem 2rem 4rem;
+                padding: 3rem 2rem;
                 overflow: hidden;
                 background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(249,250,251,0.98) 100%);
             }
@@ -121,6 +121,7 @@
                 z-index: 10;
                 max-width: 1200px;
                 margin: 0 auto;
+                padding: 0;
             }
             
             .badge {
@@ -381,6 +382,220 @@
             .feature-card {
                 opacity: 0;
             }
+            
+            /* Responsive Design */
+            @media (max-width: 1024px) {
+                #project-description {
+                    padding: 2rem 1.5rem;
+                }
+                
+                #project-description .title .line1,
+                #project-description .title .line2 {
+                    font-size: clamp(36px, 6vw, 72px);
+                }
+                
+                #project-description .subtitle {
+                    font-size: clamp(14px, 2.5vw, 18px);
+                    margin: 2rem auto 2rem;
+                }
+                
+                .feature-cards {
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 1rem;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                #sidebar-toggle {
+                    top: 15px;
+                    left: 15px;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                }
+                
+                #sidebar-toggle.shifted {
+                    left: 340px;
+                }
+                
+                #agent-selector {
+                    width: 280px;
+                    left: -300px;
+                }
+                
+                #project-description {
+                    padding: 1.5rem 1rem;
+                }
+                
+                #project-description .title .line1,
+                #project-description .title .line2 {
+                    font-size: clamp(32px, 8vw, 56px);
+                }
+                
+                #project-description .subtitle {
+                    font-size: clamp(14px, 3vw, 16px);
+                    margin: 1.5rem auto 1.5rem;
+                }
+                
+                .badge {
+                    font-size: 12px;
+                    padding: 6px 12px;
+                    margin-bottom: 1.5rem;
+                }
+                
+                .badge svg {
+                    width: 14px;
+                    height: 14px;
+                }
+                
+                .cta-buttons {
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    margin-bottom: 2.5rem;
+                }
+                
+                .btn-primary,
+                .btn-secondary {
+                    width: 100%;
+                    max-width: 320px;
+                    padding: 14px 24px;
+                    font-size: 16px;
+                    justify-content: center;
+                }
+                
+                .feature-cards {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                }
+                
+                .feature-card {
+                    padding: 1.5rem;
+                }
+                
+                .feature-card h3 {
+                    font-size: 20px;
+                }
+                
+                .feature-card p {
+                    font-size: 14px;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                #sidebar-toggle {
+                    top: 10px;
+                    left: 10px;
+                    padding: 8px 12px;
+                    font-size: 13px;
+                }
+                
+                #sidebar-toggle.shifted {
+                    left: 300px;
+                }
+                
+                #agent-selector {
+                    width: 260px;
+                    left: -280px;
+                    padding: 15px;
+                }
+                
+                #project-description {
+                    padding: 1rem 0.75rem;
+                }
+                
+                #project-description .title .line1,
+                #project-description .title .line2 {
+                    font-size: clamp(28px, 10vw, 48px);
+                    margin-bottom: 0.3rem;
+                }
+                
+                #project-description .subtitle {
+                    font-size: 14px;
+                    margin: 1.25rem auto 1.25rem;
+                    padding: 0 0.5rem;
+                }
+                
+                .badge {
+                    font-size: 11px;
+                    padding: 5px 10px;
+                    margin-bottom: 1.25rem;
+                }
+                
+                .badge svg {
+                    width: 12px;
+                    height: 12px;
+                }
+                
+                .cta-buttons {
+                    margin-bottom: 2rem;
+                }
+                
+                .btn-primary,
+                .btn-secondary {
+                    max-width: 280px;
+                    padding: 12px 20px;
+                    font-size: 15px;
+                }
+                
+                .btn-primary svg,
+                .btn-secondary svg {
+                    width: 16px;
+                    height: 16px;
+                }
+                
+                .contributor-avatar {
+                    width: 20px;
+                    height: 20px;
+                }
+                
+                .feature-card {
+                    padding: 1.25rem;
+                }
+                
+                .feature-card-icon {
+                    width: 40px;
+                    height: 40px;
+                }
+                
+                .feature-card-icon svg {
+                    width: 20px;
+                    height: 20px;
+                }
+                
+                .feature-card h3 {
+                    font-size: 18px;
+                }
+                
+                .feature-card p {
+                    font-size: 13px;
+                }
+                
+                .drone-scene-container {
+                    opacity: 0.4;
+                }
+            }
+            
+            @media (max-width: 360px) {
+                #project-description .title .line1,
+                #project-description .title .line2 {
+                    font-size: 24px;
+                }
+                
+                #project-description .subtitle {
+                    font-size: 13px;
+                }
+                
+                .btn-primary,
+                .btn-secondary {
+                    max-width: 100%;
+                    padding: 10px 16px;
+                    font-size: 14px;
+                }
+                
+                .feature-card h3 {
+                    font-size: 16px;
+                }
+            }
         </style>
     </head>
 
@@ -415,7 +630,7 @@
                 </h1>
                 
                 <p class="subtitle">
-                    Experience real-time 3D visualization of AI-powered drone navigation systems.<br>
+                    Experience 3D visualization of AI-powered drone navigation systems.<br>
                     Advanced path planning, obstacle avoidance, and autonomous decision-making in stunning detail.
                 </p>
                 
