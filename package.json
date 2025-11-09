@@ -17,7 +17,7 @@
     "mujoco",
     "wasm"
   ],
-  "author": "Sergei Surovtsev and Johnathon Selstad",
+  "author": "Snehil, Ribhav and Rijul",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/zalo/mujoco_wasm/issues"
