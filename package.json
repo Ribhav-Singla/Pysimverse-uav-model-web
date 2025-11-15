@@ -2,6 +2,7 @@
   "name": "mujoco_wasm",
   "version": "0.0.2",
   "description": "Run MuJoCo simulations in browser",
+  "type": "module",
   "main": "dist/mujoco_wasm.js",
   "directories": {
     "lib": "lib"
@@ -24,6 +25,10 @@
   },
   "homepage": "https://github.com/zalo/mujoco_wasm#readme",
   "dependencies": {
+    "bullmq": "^5.63.1",
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.8.2",
+    "node-cron": "^4.2.1",
     "three": "^0.181.0"
   }
 }
