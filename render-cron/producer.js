@@ -159,6 +159,7 @@ export async function init() {
         
         // Upload the data to Vercel Blob
         await saveAgentsData(result.data);
+        process.exit(0);
 
     } catch (error) {
         console.error('❌ Failed to add job:', error.message);
