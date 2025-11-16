@@ -1,0 +1,39 @@
+name: Update Agent Data
+
+on:
+  schedule:
+    # Runs every 15 minutes (minimum interval for GitHub Actions is 5 minutes)
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-agents:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Create .env file
+        run: |
+          echo "UPSTASH_REDIS_URL=${{ secrets.UPSTASH_REDIS_URL }}" >> .env
+          echo "BLOB_READ_WRITE_TOKEN=${{ secrets.BLOB_READ_WRITE_TOKEN }}" >> .env
+      
+      - name: Run producer to update agent data
+        run: node render-cron/cron.js
+        env:
+          UPSTASH_REDIS_URL: ${{ secrets.UPSTASH_REDIS_URL }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+      
+      - name: Notify on failure
+        if: failure()
+        run: echo "❌ Agent data update failed"
