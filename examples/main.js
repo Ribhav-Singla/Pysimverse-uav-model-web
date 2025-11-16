@@ -4,6 +4,7 @@ import { GUI              } from 'three/addons/libs/lil-gui.module.min.js';
 import { OrbitControls    } from 'three/addons/controls/OrbitControls.js';
 import { DragStateManager } from './utils/DragStateManager.js';
 import { setupGUI, downloadExampleScenesFolder, loadSceneFromURL, getPosition, getQuaternion, toMujocoPos, standardNormal } from './mujocoUtils.js';
+import { fetchAgentXML, fetchAgentMetadata, fetchAgentTrajectory } from './blobStorage.js';
 import   load_mujoco        from '../dist/mujoco_wasm.js';
 
 // Load the MuJoCo Module
@@ -160,23 +161,13 @@ export class MuJoCoDemo {
       // Clear trajectory visualization
       this.clearTrajectoryDots();
       
-      // Construct the path to the XML and metadata files
-      const scenePath = `./Agents/${agentType}/obstacles_${obstacleCount}/map.xml`;
-      const metadataPath = `./Agents/${agentType}/obstacles_${obstacleCount}/map_metadata.json`;
+      // Fetch the XML file from Vercel Blob
+      loadingMessage.textContent = 'Fetching scene from cloud storage...';
+      const xmlText = await fetchAgentXML(agentType, obstacleCount);
       
-      // Fetch the XML file
-      const xmlResponse = await fetch(scenePath);
-      if (!xmlResponse.ok) {
-        throw new Error(`Failed to load scene: ${scenePath}`);
-      }
-      const xmlText = await xmlResponse.text();
-      
-      // Fetch the metadata file
-      const metadataResponse = await fetch(metadataPath);
-      if (!metadataResponse.ok) {
-        throw new Error(`Failed to load metadata: ${metadataPath}`);
-      }
-      currentMetadata = await metadataResponse.json();
+      // Fetch the metadata file from Vercel Blob
+      loadingMessage.textContent = 'Fetching metadata from cloud storage...';
+      currentMetadata = await fetchAgentMetadata(agentType, obstacleCount);
       
       // Write the XML to the virtual file system
       const sceneFileName = `agent_scene_${agentType}_${obstacleCount}.xml`;
@@ -229,16 +220,10 @@ export class MuJoCoDemo {
     const simulationStatus = document.getElementById('simulation-status');
     
     try {
-      const trajectoryPath = `./Agents/${agentType}/obstacles_${obstacleCount}/trajectories/trajectory.json`;
+      simulationStatus.textContent = 'Loading trajectory from cloud storage...';
       
-      simulationStatus.textContent = 'Loading trajectory...';
-      
-      const response = await fetch(trajectoryPath);
-      if (!response.ok) {
-        throw new Error(`Failed to load trajectory: ${trajectoryPath}`);
-      }
-      
-      currentTrajectory = await response.json();
+      // Fetch trajectory from Vercel Blob
+      currentTrajectory = await fetchAgentTrajectory(agentType, obstacleCount);
       simulationStatus.textContent = `Trajectory loaded: ${currentTrajectory.length} steps`;
       
       return true;

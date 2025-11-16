@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install",
+  "buildCommand": "npm install && node cron/cron.js &",
   "outputDirectory": ".",
   "installCommand": "npm install",
   "headers": [
@@ -15,12 +15,6 @@
           "value": "same-origin"
         }
       ]
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron",
-      "schedule": "*/15 * * * *"
     }
   ]
 }
