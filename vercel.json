@@ -19,8 +19,8 @@
   ],
   "crons": [
     {
-      "path": "/api/add-job",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
