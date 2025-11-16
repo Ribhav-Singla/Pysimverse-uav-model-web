@@ -2,7 +2,7 @@ name: Update Agent Data
 
 on:
   schedule:
-    # Runs every 24 hours (minimum interval for GitHub Actions is 5 minutes)
+    # Runs every 24 hour (minimum interval for GitHub Actions is 5 minutes)
     - cron: '0 0 * * *'
   workflow_dispatch: # Allows manual triggering
 
