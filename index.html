@@ -229,7 +229,7 @@
                 color: #111827;
                 border: 2px solid #d1d5db;
                 border-radius: 8px;
-                font-size: 18px;
+                font-size: 15px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
@@ -598,6 +598,163 @@
                     font-size: 16px;
                 }
             }
+            
+            /* Comparison Modal Styles */
+            #comparison-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 10000;
+                padding: 20px;
+                overflow-y: auto;
+            }
+            
+            #comparison-modal.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .modal-content {
+                background: white;
+                border-radius: 16px;
+                padding: 30px;
+                max-width: 1400px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                position: relative;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+            
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #e5e7eb;
+            }
+            
+            .modal-header h2 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                color: #111827;
+            }
+            
+            .close-modal {
+                background: #f3f4f6;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 24px;
+                color: #6b7280;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+            
+            .close-modal:hover {
+                background: #e5e7eb;
+                color: #111827;
+                transform: rotate(90deg);
+            }
+            
+            .chart-container {
+                position: relative;
+                height: 500px;
+                margin-bottom: 30px;
+            }
+            
+            .chart-controls {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+            
+            .chart-controls select {
+                padding: 10px 15px;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                font-size: 14px;
+                cursor: pointer;
+                background: white;
+                transition: all 0.3s ease;
+            }
+            
+            .chart-controls select:hover {
+                border-color: #0891b2;
+            }
+            
+            .chart-controls select:focus {
+                outline: none;
+                border-color: #0891b2;
+                box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+            }
+            
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin-top: 20px;
+            }
+            
+            .stat-card {
+                background: #f9fafb;
+                padding: 15px;
+                border-radius: 8px;
+                text-align: center;
+            }
+            
+            .stat-card h4 {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 600;
+            }
+            
+            .stat-card .value {
+                font-size: 24px;
+                font-weight: 700;
+                color: #111827;
+            }
+            
+            .loading-spinner {
+                text-align: center;
+                padding: 40px;
+                color: #6b7280;
+            }
+            
+            @media (max-width: 768px) {
+                .modal-content {
+                    padding: 20px;
+                }
+                
+                .modal-header h2 {
+                    font-size: 22px;
+                }
+                
+                .chart-container {
+                    height: 350px;
+                }
+                
+                .chart-controls {
+                    flex-direction: column;
+                }
+                
+                .chart-controls select {
+                    width: 100%;
+                }
+            }
         </style>
     </head>
 
@@ -646,6 +803,17 @@
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </button>
+                    <button class="btn-secondary" id="show-comparison-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        Analytics
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
                     <a href="https://github.com/Ribhav-Singla/Pysimverse-uav-model-web" target="_blank" class="btn-secondary">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -689,6 +857,21 @@
                 </div>
             </div>
         </section>
+
+        <!-- Comparison Modal -->
+        <div id="comparison-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Agent Performance Comparison</h2>
+                    <button class="close-modal" id="close-modal-btn">×</button>
+                </div>
+                <div id="modal-body">
+                    <div class="loading-spinner">
+                        <p>Loading comparison data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Agent Selection UI -->
         <div id="agent-selector">
@@ -739,6 +922,9 @@
 
 		<!-- Import maps polyfill -->
 		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+        
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 
         <!-- Allows three.js Examples to work without building -->
         <script type="importmap">
@@ -763,6 +949,9 @@
                 const toggleBtn = document.getElementById('sidebar-toggle');
                 const projectDescription = document.getElementById('project-description');
                 const startVisualizationBtn = document.getElementById('start-visualization-btn');
+                const showComparisonBtn = document.getElementById('show-comparison-btn');
+                const comparisonModal = document.getElementById('comparison-modal');
+                const closeModalBtn = document.getElementById('close-modal-btn');
                 
                 // Initialize drone scene
                 const droneContainer = document.querySelector('.drone-scene-container');
@@ -828,6 +1017,398 @@
                     toggleBtn.classList.add('shifted');
                     toggleBtn.innerHTML = '✕ Close';
                 });
+                
+                // Handle Comparison Graph button
+                showComparisonBtn.addEventListener('click', async function() {
+                    comparisonModal.classList.add('active');
+                    await loadComparisonData();
+                });
+                
+                // Handle Close Modal button
+                closeModalBtn.addEventListener('click', function() {
+                    comparisonModal.classList.remove('active');
+                });
+                
+                // Close modal on outside click
+                comparisonModal.addEventListener('click', function(e) {
+                    if (e.target === comparisonModal) {
+                        comparisonModal.classList.remove('active');
+                    }
+                });
+                
+                // Load and display comparison data
+                async function loadComparisonData() {
+                    const modalBody = document.getElementById('modal-body');
+                    modalBody.innerHTML = '<div class="loading-spinner"><p>Loading comparison data...</p></div>';
+                    
+                    try {
+                        const response = await fetch('https://pub-9feba5102f904684b1adbddd1998b17d.r2.dev/Agents/results_summary.csv');
+                        const csvText = await response.text();
+                        const data = parseCSV(csvText);
+                        
+                        renderComparisonCharts(data);
+                    } catch (error) {
+                        console.error('Error loading comparison data:', error);
+                        modalBody.innerHTML = `
+                            <div class="loading-spinner" style="color: #f44336;">
+                                <p>Error loading data: ${error.message}</p>
+                                <p>Please check your internet connection and try again.</p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Parse CSV data
+                function parseCSV(csvText) {
+                    const lines = csvText.trim().split('\n');
+                    const headers = lines[0].split(',');
+                    const data = [];
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = lines[i].split(',');
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index];
+                        });
+                        data.push(row);
+                    }
+                    
+                    return data;
+                }
+                
+                // Render comparison charts
+                function renderComparisonCharts(data) {
+                    const modalBody = document.getElementById('modal-body');
+                    
+                    // Calculate statistics
+                    const models = ['Pure_Neural', 'Neurosymbolic', 'AR_PPO'];
+                    const stats = {};
+                    
+                    models.forEach(model => {
+                        const modelData = data.filter(row => row.model === model);
+                        const successfulRuns = modelData.filter(row => row.goal_reached === 'True');
+                        const totalSteps = modelData.reduce((sum, row) => sum + parseInt(row.number_of_steps), 0);
+                        const avgSteps = successfulRuns.length > 0 ? 
+                            successfulRuns.reduce((sum, row) => sum + parseInt(row.number_of_steps), 0) / successfulRuns.length : 0;
+                        
+                        stats[model] = {
+                            successRate: (successfulRuns.length / modelData.length * 100).toFixed(1),
+                            avgSteps: Math.round(avgSteps),
+                            totalRuns: modelData.length,
+                            successful: successfulRuns.length
+                        };
+                    });
+                    
+                    modalBody.innerHTML = `
+                        <div class="chart-controls">
+                            <label>
+                                <strong>Chart Type:</strong>
+                                <select id="chart-type">
+                                    <option value="steps">Steps per Level</option>
+                                    <option value="success">Success Rate</option>
+                                    <option value="comparison">Side-by-Side Comparison</option>
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="comparison-chart"></canvas>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h4>Pure Neural</h4>
+                                <div class="value" style="color: #ef4444;">${stats.Pure_Neural.successRate}%</div>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">Success Rate</p>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">${stats.Pure_Neural.avgSteps} avg steps</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>Neurosymbolic</h4>
+                                <div class="value" style="color: #3b82f6;">${stats.Neurosymbolic.successRate}%</div>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">Success Rate</p>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">${stats.Neurosymbolic.avgSteps} avg steps</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>AR PPO</h4>
+                                <div class="value" style="color: #10b981;">${stats.AR_PPO.successRate}%</div>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">Success Rate</p>
+                                <p style="margin: 5px 0 0 0; font-size: 12px; color: #6b7280;">${stats.AR_PPO.avgSteps} avg steps</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Initial chart
+                    let currentChart = createStepsChart(data);
+                    
+                    // Chart type selector
+                    document.getElementById('chart-type').addEventListener('change', function(e) {
+                        if (currentChart) {
+                            currentChart.destroy();
+                        }
+                        
+                        switch(e.target.value) {
+                            case 'steps':
+                                currentChart = createStepsChart(data);
+                                break;
+                            case 'success':
+                                currentChart = createSuccessChart(data);
+                                break;
+                            case 'comparison':
+                                currentChart = createComparisonChart(data);
+                                break;
+                        }
+                    });
+                }
+                
+                // Create steps per level chart
+                function createStepsChart(data) {
+                    const ctx = document.getElementById('comparison-chart').getContext('2d');
+                    const models = ['Pure_Neural', 'Neurosymbolic', 'AR_PPO'];
+                    const colors = {
+                        'Pure_Neural': '#ef4444',
+                        'Neurosymbolic': '#3b82f6',
+                        'AR_PPO': '#10b981'
+                    };
+                    
+                    const levels = [...new Set(data.map(row => parseInt(row.level)))].sort((a, b) => a - b);
+                    
+                    const datasets = models.map(model => {
+                        const modelData = levels.map(level => {
+                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                            return row ? parseInt(row.number_of_steps) : null;
+                        });
+                        
+                        return {
+                            label: model.replace('_', ' '),
+                            data: modelData,
+                            borderColor: colors[model],
+                            backgroundColor: colors[model] + '20',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        };
+                    });
+                    
+                    return new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: levels.map(l => `Level ${l}`),
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Number of Steps per Obstacle Level',
+                                    font: { size: 18, weight: 'bold' }
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        title: function(context) {
+                                            return context[0].label;
+                                        },
+                                        label: function(context) {
+                                            const dataIndex = context.dataIndex;
+                                            const model = context.dataset.label.replace(' ', '_');
+                                            const level = levels[dataIndex];
+                                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                                            
+                                            if (!row) return '';
+                                            
+                                            const lines = [
+                                                `${context.dataset.label}: ${context.parsed.y} steps`,
+                                                `Goal Reached: ${row.goal_reached === 'True' ? '✓' : '✗'}`,
+                                                `Collision: ${row.collision === 'True' ? 'Yes' : 'No'}`,
+                                                `Out of Bounds: ${row.out_of_bound === 'True' ? 'Yes' : 'No'}`
+                                            ];
+                                            return lines;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Steps',
+                                        font: { size: 14, weight: 'bold' }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Obstacle Level',
+                                        font: { size: 14, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Create success rate chart
+                function createSuccessChart(data) {
+                    const ctx = document.getElementById('comparison-chart').getContext('2d');
+                    const models = ['Pure_Neural', 'Neurosymbolic', 'AR_PPO'];
+                    const colors = {
+                        'Pure_Neural': '#ef4444',
+                        'Neurosymbolic': '#3b82f6',
+                        'AR_PPO': '#10b981'
+                    };
+                    
+                    const successRates = models.map(model => {
+                        const modelData = data.filter(row => row.model === model);
+                        const successful = modelData.filter(row => row.goal_reached === 'True').length;
+                        return (successful / modelData.length * 100).toFixed(1);
+                    });
+                    
+                    return new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: models.map(m => m.replace('_', ' ')),
+                            datasets: [{
+                                label: 'Success Rate (%)',
+                                data: successRates,
+                                backgroundColor: models.map(m => colors[m]),
+                                borderColor: models.map(m => colors[m]),
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Success Rate by Agent Type',
+                                    font: { size: 18, weight: 'bold' }
+                                },
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const model = models[context.dataIndex];
+                                            const modelData = data.filter(row => row.model === model);
+                                            const successful = modelData.filter(row => row.goal_reached === 'True').length;
+                                            
+                                            return [
+                                                `Success Rate: ${context.parsed.y}%`,
+                                                `Successful: ${successful}/${modelData.length} runs`
+                                            ];
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Success Rate (%)',
+                                        font: { size: 14, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Create side-by-side comparison chart
+                function createComparisonChart(data) {
+                    const ctx = document.getElementById('comparison-chart').getContext('2d');
+                    const models = ['Pure_Neural', 'Neurosymbolic', 'AR_PPO'];
+                    const colors = {
+                        'Pure_Neural': '#ef4444',
+                        'Neurosymbolic': '#3b82f6',
+                        'AR_PPO': '#10b981'
+                    };
+                    
+                    const levels = [...new Set(data.map(row => parseInt(row.level)))].sort((a, b) => a - b);
+                    
+                    const datasets = models.map(model => {
+                        const modelData = levels.map(level => {
+                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                            return row ? parseInt(row.number_of_steps) : null;
+                        });
+                        
+                        return {
+                            label: model.replace('_', ' '),
+                            data: modelData,
+                            backgroundColor: colors[model],
+                            borderColor: colors[model],
+                            borderWidth: 2
+                        };
+                    });
+                    
+                    return new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: levels.map(l => `Level ${l}`),
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Steps Comparison by Level',
+                                    font: { size: 18, weight: 'bold' }
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const dataIndex = context.dataIndex;
+                                            const model = context.dataset.label.replace(' ', '_');
+                                            const level = levels[dataIndex];
+                                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                                            
+                                            if (!row) return '';
+                                            
+                                            return [
+                                                `${context.dataset.label}: ${context.parsed.y} steps`,
+                                                `Goal: ${row.goal_reached === 'True' ? '✓ Reached' : '✗ Failed'}`,
+                                                `Status: ${row.collision === 'True' ? 'Collision' : row.out_of_bound === 'True' ? 'Out of Bounds' : 'Clean'}`
+                                            ];
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Steps',
+                                        font: { size: 14, weight: 'bold' }
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Obstacle Level',
+                                        font: { size: 14, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
             });
         </script>
     </body>
