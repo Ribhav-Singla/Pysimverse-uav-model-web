@@ -25,7 +25,6 @@
   },
   "homepage": "https://github.com/zalo/mujoco_wasm#readme",
   "dependencies": {
-    "@vercel/blob": "^2.0.0",
     "bullmq": "^5.63.1",
     "dotenv": "^17.2.3",
     "ioredis": "^5.8.2",

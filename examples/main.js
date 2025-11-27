@@ -4,7 +4,7 @@ import { GUI              } from 'three/addons/libs/lil-gui.module.min.js';
 import { OrbitControls    } from 'three/addons/controls/OrbitControls.js';
 import { DragStateManager } from './utils/DragStateManager.js';
 import { setupGUI, downloadExampleScenesFolder, loadSceneFromURL, getPosition, getQuaternion, toMujocoPos, standardNormal } from './mujocoUtils.js';
-import { fetchAgentXML, fetchAgentMetadata, fetchAgentTrajectory } from './blobStorage.js';
+import { fetchAgentXML, fetchAgentMetadata, fetchAgentTrajectory } from './r2Storage.js';
 import   load_mujoco        from '../dist/mujoco_wasm.js';
 
 // Load the MuJoCo Module
@@ -161,11 +161,11 @@ export class MuJoCoDemo {
       // Clear trajectory visualization
       this.clearTrajectoryDots();
       
-      // Fetch the XML file from Vercel Blob
+      // Fetch the XML file from Cloudflare R2
       loadingMessage.textContent = 'Fetching scene from cloud storage...';
       const xmlText = await fetchAgentXML(agentType, obstacleCount);
       
-      // Fetch the metadata file from Vercel Blob
+      // Fetch the metadata file from Cloudflare R2
       loadingMessage.textContent = 'Fetching metadata from cloud storage...';
       currentMetadata = await fetchAgentMetadata(agentType, obstacleCount);
       
@@ -222,7 +222,7 @@ export class MuJoCoDemo {
     try {
       simulationStatus.textContent = 'Loading trajectory from cloud storage...';
       
-      // Fetch trajectory from Vercel Blob
+      // Fetch trajectory from Cloudflare R2
       currentTrajectory = await fetchAgentTrajectory(agentType, obstacleCount);
       simulationStatus.textContent = `Trajectory loaded: ${currentTrajectory.length} steps`;
       
