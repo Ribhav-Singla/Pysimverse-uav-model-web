@@ -904,6 +904,11 @@
                 <option value="15">15 Obstacles</option>
             </select>
             
+            <label for="map-select">Map:</label>
+            <select id="map-select">
+                <option value="">-- Select Map --</option>
+            </select>
+            
             <label for="simulation-speed">Simulation Speed:</label>
             <select id="simulation-speed">
                 <option value="1">Very Fast (1x)</option>
@@ -997,6 +1002,212 @@
                 
                 // Trigger animations
                 animateElements();
+                
+                // Dynamic R2 manifest and UI population
+                const baseR2Url = 'https://pub-9feba5102f904684b1adbddd1998b17d.r2.dev/Agents/';
+
+                const agentTypeSelect = document.getElementById('agent-type');
+                const obstacleCountSelect = document.getElementById('obstacle-count');
+                const mapSelect = document.getElementById('map-select');
+                const loadSceneBtn = document.getElementById('load-scene-btn');
+                const runSimulationBtn = document.getElementById('run-simulation-btn');
+                const stopSimulationBtn = document.getElementById('stop-simulation-btn');
+                const loadingMessage = document.getElementById('loading-message');
+                const metadataDisplay = document.getElementById('metadata-display');
+
+                let manifest = null;
+
+                async function tryFetchJson(url) {
+                    try {
+                        const res = await fetch(url);
+                        if (!res.ok) throw new Error('Not found');
+                        const json = await res.json();
+                        return json;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                async function loadManifest() {
+                    const candidates = ['index.json','manifest.json','agents.json'];
+                    for (const c of candidates) {
+                        const url = baseR2Url + c;
+                        const j = await tryFetchJson(url);
+                        if (j) {
+                            loadingMessage.textContent = 'Loaded manifest from R2.';
+                            return j;
+                        }
+                    }
+                    loadingMessage.textContent = 'No manifest found on R2 — using local fallback.';
+                    return null;
+                }
+
+                function populateAgentTypesFromManifest(m) {
+                    agentTypeSelect.innerHTML = '<option value="">-- Select Agent --</option>';
+                    if (!m) {
+                        // fallback to static options already present in DOM; keep them
+                        return;
+                    }
+                    // Support multiple manifest shapes:
+                    // 1) { agents: { Pure_Neural: {...}, ... } }
+                    // 2) { Pure_Neural: { ... }, Neurosymbolic: {...} }
+                    // 3) Array of agent names
+                    let keys = [];
+                    if (m.agents && typeof m.agents === 'object') keys = Object.keys(m.agents);
+                    else if (Array.isArray(m)) keys = m;
+                    else keys = Object.keys(m);
+                    keys.forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k;
+                        opt.textContent = k.replace('_', ' ');
+                        agentTypeSelect.appendChild(opt);
+                    });
+                }
+
+                function clearSelect(sel, placeholder='-- Select --') {
+                    sel.innerHTML = '';
+                    const o = document.createElement('option');
+                    o.value = '';
+                    o.textContent = placeholder;
+                    sel.appendChild(o);
+                }
+
+                function obstacleKeyToNumber(key) {
+                    const m = key.match(/obstacles?_?(\d+)/i);
+                    if (m) return parseInt(m[1],10);
+                    const n = parseInt(key,10);
+                    return isNaN(n)? null: n;
+                }
+
+                function populateObstacleCountsForAgent(agent) {
+                    clearSelect(obstacleCountSelect,'-- Select Obstacle Count --');
+                    if (!manifest) {
+                        // fallback 1-15
+                        for (let i=1;i<=15;i++){
+                            const o = document.createElement('option');
+                            o.value = i;
+                            o.textContent = i + (i===1? ' Obstacle':' Obstacles');
+                            obstacleCountSelect.appendChild(o);
+                        }
+                        return;
+                    }
+                    // manifest may contain object for agent listing obstacle folders
+                    const agentObj = manifest.agents ? manifest.agents[agent] || manifest[agent] : manifest[agent];
+                    if (!agentObj) {
+                        loadingMessage.textContent = 'No obstacles listing for selected agent; using fallback counts.';
+                        for (let i=1;i<=15;i++){
+                            const o = document.createElement('option');
+                            o.value = i;
+                            o.textContent = i + (i===1? ' Obstacle':' Obstacles');
+                            obstacleCountSelect.appendChild(o);
+                        }
+                        return;
+                    }
+                    const keys = Object.keys(agentObj);
+                    // Map keys like obstacles_1 -> 1
+                    const counts = keys.map(k => obstacleKeyToNumber(k)).filter(n=>n!==null).sort((a,b)=>a-b);
+                    counts.forEach(n=>{
+                        const o = document.createElement('option');
+                        o.value = n;
+                        o.textContent = n + (n===1? ' Obstacle':' Obstacles');
+                        obstacleCountSelect.appendChild(o);
+                    });
+                }
+
+                function populateMapsForSelection(agent, count) {
+                    clearSelect(mapSelect,'-- Select Map --');
+                    if (!manifest) {
+                        // No manifest -> try to fetch listing file for that folder
+                        return;
+                    }
+                    const agentObj = manifest.agents ? manifest.agents[agent] || manifest[agent] : manifest[agent];
+                    if (!agentObj) return;
+                    const key = Object.keys(agentObj).find(k => obstacleKeyToNumber(k) === parseInt(count,10));
+                    if (!key) return;
+                    const maps = agentObj[key]; // expect array of map names or object
+                    if (Array.isArray(maps)) {
+                        maps.forEach(m=>{
+                            const o = document.createElement('option');
+                            o.value = m;
+                            o.textContent = m;
+                            mapSelect.appendChild(o);
+                        });
+                    } else if (typeof maps === 'object') {
+                        Object.keys(maps).forEach(m=>{
+                            const o = document.createElement('option');
+                            o.value = m;
+                            o.textContent = m;
+                            mapSelect.appendChild(o);
+                        });
+                    }
+                }
+
+                async function initDynamicUi() {
+                    manifest = await loadManifest();
+                    populateAgentTypesFromManifest(manifest);
+                    // keep existing static agent options as fallback if manifest absent
+                    agentTypeSelect.addEventListener('change', ()=>{
+                        const agent = agentTypeSelect.value;
+                        if (!agent) {
+                            clearSelect(obstacleCountSelect,'-- Select Obstacle Count --');
+                            clearSelect(mapSelect,'-- Select Map --');
+                            updateButtonsState();
+                            return;
+                        }
+                        populateObstacleCountsForAgent(agent);
+                        clearSelect(mapSelect,'-- Select Map --');
+                        updateButtonsState();
+                    });
+                    obstacleCountSelect.addEventListener('change', ()=>{
+                        const agent = agentTypeSelect.value;
+                        const count = obstacleCountSelect.value;
+                        if (!agent || !count) {
+                            clearSelect(mapSelect,'-- Select Map --');
+                            updateButtonsState();
+                            return;
+                        }
+                        populateMapsForSelection(agent,count);
+                        updateButtonsState();
+                    });
+                    mapSelect.addEventListener('change', async ()=>{
+                        updateButtonsState();
+                        const agent = agentTypeSelect.value;
+                        const count = obstacleCountSelect.value;
+                        const map = mapSelect.value;
+                        if (!agent || !count || !map) return;
+                        await loadMapMetadata(agent,count,map);
+                    });
+                    updateButtonsState();
+                }
+
+                function updateButtonsState(){
+                    const ok = document.getElementById('agent-type').value && document.getElementById('obstacle-count').value && document.getElementById('map-select').value;
+                    document.getElementById('load-scene-btn').disabled = !ok;
+                    // run/stop remain disabled until a scene is loaded
+                }
+
+                async function loadMapMetadata(agent,count,map){
+                    const mdUrl = `${baseR2Url}${agent}/obstacles_${count}/${map}/map_metadata.json`;
+                    loadingMessage.textContent = 'Loading map metadata...';
+                    try{
+                        const r = await fetch(mdUrl);
+                        if (!r.ok) throw new Error('metadata not found');
+                        const j = await r.json();
+                        const md = document.getElementById('metadata-display');
+                        md.style.display = 'block';
+                        md.innerHTML = `<pre style="white-space:pre-wrap; text-align:left;">${JSON.stringify(j,null,2)}</pre>`;
+                        loadingMessage.textContent = '';
+                        // enable run button now that metadata exists
+                        document.getElementById('run-simulation-btn').disabled = false;
+                        document.getElementById('stop-simulation-btn').disabled = false;
+                    }catch(e){
+                        loadingMessage.textContent = 'Could not load map metadata from R2.';
+                        console.warn('loadMapMetadata',e);
+                    }
+                }
+
+                // start dynamic UI initialization (non-blocking)
+                initDynamicUi();
                 
                 toggleBtn.addEventListener('click', function() {
                     sidebar.classList.toggle('open');
