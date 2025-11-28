@@ -34,13 +34,13 @@ async function listAgentsFiles() {
  * Get the URL for a specific file in the Agents folder
  * Constructs the R2 public URL based on the file path
  */
-function getAgentFileUrl(agentType, obstacleCount, fileName) {
+function getAgentFileUrl(agentType, obstacleCount, mapId, fileName) {
   // Construct the file path in R2
   let filePath;
   if (fileName.includes('trajectory')) {
-    filePath = `Agents/${agentType}/obstacles_${obstacleCount}/trajectories/${fileName}`;
+    filePath = `Agents/${agentType}/obstacles_${obstacleCount}/map_${mapId}/trajectories/${fileName}`;
   } else {
-    filePath = `Agents/${agentType}/obstacles_${obstacleCount}/${fileName}`;
+    filePath = `Agents/${agentType}/obstacles_${obstacleCount}/map_${mapId}/${fileName}`;
   }
   
   // Construct the public R2 URL using r2.dev domain
@@ -53,9 +53,9 @@ function getAgentFileUrl(agentType, obstacleCount, fileName) {
 /**
  * Fetch XML file from Cloudflare R2
  */
-async function fetchAgentXML(agentType, obstacleCount) {
+async function fetchAgentXML(agentType, obstacleCount, mapId) {
   try {
-    const url = getAgentFileUrl(agentType, obstacleCount, 'map.xml');
+    const url = getAgentFileUrl(agentType, obstacleCount, mapId, 'map.xml');
     console.log('Fetching XML from R2:', url);
     const response = await fetch(url, {
       cache: 'reload'  // Force revalidation with server
@@ -75,9 +75,9 @@ async function fetchAgentXML(agentType, obstacleCount) {
 /**
  * Fetch metadata JSON from Cloudflare R2
  */
-async function fetchAgentMetadata(agentType, obstacleCount) {
+async function fetchAgentMetadata(agentType, obstacleCount, mapId) {
   try {
-    const url = getAgentFileUrl(agentType, obstacleCount, 'map_metadata.json');
+    const url = getAgentFileUrl(agentType, obstacleCount, mapId, 'map_metadata.json');
     console.log('Fetching metadata from R2:', url);
     const response = await fetch(url, {
       cache: 'reload'  // Force revalidation with server
@@ -97,9 +97,9 @@ async function fetchAgentMetadata(agentType, obstacleCount) {
 /**
  * Fetch trajectory JSON from Cloudflare R2
  */
-async function fetchAgentTrajectory(agentType, obstacleCount) {
+async function fetchAgentTrajectory(agentType, obstacleCount, mapId) {
   try {
-    const url = getAgentFileUrl(agentType, obstacleCount, 'trajectory.json');
+    const url = getAgentFileUrl(agentType, obstacleCount, mapId, 'trajectory.json');
     console.log('Fetching trajectory from R2:', url);
     const response = await fetch(url, {
       cache: 'reload'  // Force revalidation with server

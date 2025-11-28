@@ -128,7 +128,7 @@ export class MuJoCoDemo {
   }
 
   // Load an agent scene from the Agents folder
-  async loadAgentScene(agentType, obstacleCount) {
+  async loadAgentScene(agentType, obstacleCount, mapId) {
     const loadingMessage = document.getElementById('loading-message');
     const metadataDisplay = document.getElementById('metadata-display');
     
@@ -163,11 +163,11 @@ export class MuJoCoDemo {
       
       // Fetch the XML file from Cloudflare R2
       loadingMessage.textContent = 'Fetching scene from cloud storage...';
-      const xmlText = await fetchAgentXML(agentType, obstacleCount);
+      const xmlText = await fetchAgentXML(agentType, obstacleCount, mapId);
       
       // Fetch the metadata file from Cloudflare R2
       loadingMessage.textContent = 'Fetching metadata from cloud storage...';
-      currentMetadata = await fetchAgentMetadata(agentType, obstacleCount);
+      currentMetadata = await fetchAgentMetadata(agentType, obstacleCount, mapId);
       
       // Write the XML to the virtual file system
       const sceneFileName = `agent_scene_${agentType}_${obstacleCount}.xml`;
@@ -216,14 +216,14 @@ export class MuJoCoDemo {
   }
 
   // Load trajectory data for the current agent scene
-  async loadTrajectory(agentType, obstacleCount) {
+  async loadTrajectory(agentType, obstacleCount, mapId) {
     const simulationStatus = document.getElementById('simulation-status');
     
     try {
       simulationStatus.textContent = 'Loading trajectory from cloud storage...';
       
       // Fetch trajectory from Cloudflare R2
-      currentTrajectory = await fetchAgentTrajectory(agentType, obstacleCount);
+      currentTrajectory = await fetchAgentTrajectory(agentType, obstacleCount, mapId);
       simulationStatus.textContent = `Trajectory loaded: ${currentTrajectory.length} steps`;
       
       return true;
@@ -588,6 +588,7 @@ await demo.init();
 // Set up UI event handlers for agent selection
 const agentTypeSelect = document.getElementById('agent-type');
 const obstacleCountSelect = document.getElementById('obstacle-count');
+const mapSelect = document.getElementById('map-select');
 const loadSceneButton = document.getElementById('load-scene-btn');
 const runSimulationButton = document.getElementById('run-simulation-btn');
 const stopSimulationButton = document.getElementById('stop-simulation-btn');
@@ -605,18 +606,21 @@ simulationSpeedSelect.addEventListener('change', () => {
 function updateLoadButton() {
   const agentSelected = agentTypeSelect.value !== '';
   const obstacleSelected = obstacleCountSelect.value !== '';
-  loadSceneButton.disabled = !(agentSelected && obstacleSelected);
+  const mapSelected = mapSelect.value !== '';
+  loadSceneButton.disabled = !(agentSelected && obstacleSelected && mapSelected);
 }
 
 agentTypeSelect.addEventListener('change', updateLoadButton);
 obstacleCountSelect.addEventListener('change', updateLoadButton);
+mapSelect.addEventListener('change', updateLoadButton);
 
 // Handle scene loading
 loadSceneButton.addEventListener('click', async () => {
   const agentType = agentTypeSelect.value;
   const obstacleCount = obstacleCountSelect.value;
+  const mapId = mapSelect.value.replace('map_', ''); // Extract map number from 'map_1' format
   
-  if (agentType && obstacleCount) {
+  if (agentType && obstacleCount && mapId) {
     loadSceneButton.disabled = true;
     runSimulationButton.disabled = true;
     stopSimulationButton.disabled = true;
@@ -627,14 +631,14 @@ loadSceneButton.addEventListener('click', async () => {
       projectDescription.style.display = 'none';
     }
     
-    await demo.loadAgentScene(agentType, obstacleCount);
+    await demo.loadAgentScene(agentType, obstacleCount, mapId);
     
     // Store current selection
     currentAgentType = agentType;
     currentObstacleCount = obstacleCount;
     
     // Load trajectory data
-    const trajectoryLoaded = await demo.loadTrajectory(agentType, obstacleCount);
+    const trajectoryLoaded = await demo.loadTrajectory(agentType, obstacleCount, mapId);
     
     loadSceneButton.disabled = false;
     runSimulationButton.disabled = !trajectoryLoaded;
