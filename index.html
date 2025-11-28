@@ -878,35 +878,17 @@
             <h2>Agent Environment Selector</h2>
             <label for="agent-type">Agent Type:</label>
             <select id="agent-type">
-                <option value="">-- Select Agent --</option>
-                <option value="AR_PPO">AR PPO</option>
-                <option value="Neurosymbolic">Neurosymbolic</option>
-                <option value="Pure_Neural">Pure Neural</option>
+                <option value="">-- Loading agents... --</option>
             </select>
             
             <label for="obstacle-count">Obstacle Count:</label>
             <select id="obstacle-count">
-                <option value="">-- Select Obstacle Count --</option>
-                <option value="1">1 Obstacle</option>
-                <option value="2">2 Obstacles</option>
-                <option value="3">3 Obstacles</option>
-                <option value="4">4 Obstacles</option>
-                <option value="5">5 Obstacles</option>
-                <option value="6">6 Obstacles</option>
-                <option value="7">7 Obstacles</option>
-                <option value="8">8 Obstacles</option>
-                <option value="9">9 Obstacles</option>
-                <option value="10">10 Obstacles</option>
-                <option value="11">11 Obstacles</option>
-                <option value="12">12 Obstacles</option>
-                <option value="13">13 Obstacles</option>
-                <option value="14">14 Obstacles</option>
-                <option value="15">15 Obstacles</option>
+                <option value="">-- Select Agent First --</option>
             </select>
             
             <label for="map-select">Map:</label>
             <select id="map-select">
-                <option value="">-- Select Map --</option>
+                <option value="">-- Select Obstacle Count First --</option>
             </select>
             
             <label for="simulation-speed">Simulation Speed:</label>
@@ -1003,7 +985,7 @@
                 // Trigger animations
                 animateElements();
                 
-                // Dynamic R2 manifest and UI population
+                // R2 storage configuration
                 const baseR2Url = 'https://pub-9feba5102f904684b1adbddd1998b17d.r2.dev/Agents/';
 
                 const agentTypeSelect = document.getElementById('agent-type');
@@ -1015,55 +997,6 @@
                 const loadingMessage = document.getElementById('loading-message');
                 const metadataDisplay = document.getElementById('metadata-display');
 
-                let manifest = null;
-
-                async function tryFetchJson(url) {
-                    try {
-                        const res = await fetch(url);
-                        if (!res.ok) throw new Error('Not found');
-                        const json = await res.json();
-                        return json;
-                    } catch (e) {
-                        return null;
-                    }
-                }
-
-                async function loadManifest() {
-                    const candidates = ['index.json','manifest.json','agents.json'];
-                    for (const c of candidates) {
-                        const url = baseR2Url + c;
-                        const j = await tryFetchJson(url);
-                        if (j) {
-                            loadingMessage.textContent = 'Loaded manifest from R2.';
-                            return j;
-                        }
-                    }
-                    loadingMessage.textContent = 'No manifest found on R2 — using local fallback.';
-                    return null;
-                }
-
-                function populateAgentTypesFromManifest(m) {
-                    agentTypeSelect.innerHTML = '<option value="">-- Select Agent --</option>';
-                    if (!m) {
-                        // fallback to static options already present in DOM; keep them
-                        return;
-                    }
-                    // Support multiple manifest shapes:
-                    // 1) { agents: { Pure_Neural: {...}, ... } }
-                    // 2) { Pure_Neural: { ... }, Neurosymbolic: {...} }
-                    // 3) Array of agent names
-                    let keys = [];
-                    if (m.agents && typeof m.agents === 'object') keys = Object.keys(m.agents);
-                    else if (Array.isArray(m)) keys = m;
-                    else keys = Object.keys(m);
-                    keys.forEach(k => {
-                        const opt = document.createElement('option');
-                        opt.value = k;
-                        opt.textContent = k.replace('_', ' ');
-                        agentTypeSelect.appendChild(opt);
-                    });
-                }
-
                 function clearSelect(sel, placeholder='-- Select --') {
                     sel.innerHTML = '';
                     const o = document.createElement('option');
@@ -1072,141 +1005,246 @@
                     sel.appendChild(o);
                 }
 
-                function obstacleKeyToNumber(key) {
-                    const m = key.match(/obstacles?_?(\d+)/i);
-                    if (m) return parseInt(m[1],10);
-                    const n = parseInt(key,10);
-                    return isNaN(n)? null: n;
-                }
-
-                function populateObstacleCountsForAgent(agent) {
-                    clearSelect(obstacleCountSelect,'-- Select Obstacle Count --');
-                    if (!manifest) {
-                        // fallback 1-15
-                        for (let i=1;i<=15;i++){
-                            const o = document.createElement('option');
-                            o.value = i;
-                            o.textContent = i + (i===1? ' Obstacle':' Obstacles');
-                            obstacleCountSelect.appendChild(o);
+                // Discover available agents from R2
+                async function discoverAgents() {
+                    loadingMessage.textContent = 'Discovering agents from R2...';
+                    
+                    try {
+                        // Load the CSV to discover available agents
+                        const response = await fetch(`${baseR2Url}results_summary.csv`);
+                        if (!response.ok) throw new Error('Cannot load results_summary.csv');
+                        
+                        const csvText = await response.text();
+                        const lines = csvText.trim().split('\n');
+                        
+                        if (lines.length < 2) {
+                            throw new Error('CSV file is empty');
                         }
-                        return;
-                    }
-                    // manifest may contain object for agent listing obstacle folders
-                    const agentObj = manifest.agents ? manifest.agents[agent] || manifest[agent] : manifest[agent];
-                    if (!agentObj) {
-                        loadingMessage.textContent = 'No obstacles listing for selected agent; using fallback counts.';
-                        for (let i=1;i<=15;i++){
-                            const o = document.createElement('option');
-                            o.value = i;
-                            o.textContent = i + (i===1? ' Obstacle':' Obstacles');
-                            obstacleCountSelect.appendChild(o);
+                        
+                        const headers = lines[0].split(',').map(h => h.trim());
+                        const modelIndex = headers.indexOf('model');
+                        
+                        if (modelIndex === -1) {
+                            throw new Error('Model column not found in CSV');
                         }
-                        return;
-                    }
-                    const keys = Object.keys(agentObj);
-                    // Map keys like obstacles_1 -> 1
-                    const counts = keys.map(k => obstacleKeyToNumber(k)).filter(n=>n!==null).sort((a,b)=>a-b);
-                    counts.forEach(n=>{
-                        const o = document.createElement('option');
-                        o.value = n;
-                        o.textContent = n + (n===1? ' Obstacle':' Obstacles');
-                        obstacleCountSelect.appendChild(o);
-                    });
-                }
-
-                function populateMapsForSelection(agent, count) {
-                    clearSelect(mapSelect,'-- Select Map --');
-                    if (!manifest) {
-                        // No manifest -> try to fetch listing file for that folder
-                        return;
-                    }
-                    const agentObj = manifest.agents ? manifest.agents[agent] || manifest[agent] : manifest[agent];
-                    if (!agentObj) return;
-                    const key = Object.keys(agentObj).find(k => obstacleKeyToNumber(k) === parseInt(count,10));
-                    if (!key) return;
-                    const maps = agentObj[key]; // expect array of map names or object
-                    if (Array.isArray(maps)) {
-                        maps.forEach(m=>{
-                            const o = document.createElement('option');
-                            o.value = m;
-                            o.textContent = m;
-                            mapSelect.appendChild(o);
+                        
+                        // Extract unique agents from CSV
+                        const agents = new Set();
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim());
+                            if (values[modelIndex]) {
+                                agents.add(values[modelIndex]);
+                            }
+                        }
+                        
+                        clearSelect(agentTypeSelect, '-- Select Agent --');
+                        
+                        const agentsList = Array.from(agents).sort();
+                        agentsList.forEach(agent => {
+                            const opt = document.createElement('option');
+                            opt.value = agent;
+                            opt.textContent = agent.replace('_', ' ');
+                            agentTypeSelect.appendChild(opt);
                         });
-                    } else if (typeof maps === 'object') {
-                        Object.keys(maps).forEach(m=>{
-                            const o = document.createElement('option');
-                            o.value = m;
-                            o.textContent = m;
-                            mapSelect.appendChild(o);
-                        });
+                        
+                        loadingMessage.textContent = `Found ${agentsList.length} agent(s)`;
+                    } catch (e) {
+                        console.error('Error discovering agents:', e);
+                        clearSelect(agentTypeSelect, '-- Select Agent --');
+                        loadingMessage.textContent = 'Error loading agents from CSV';
                     }
                 }
 
-                async function initDynamicUi() {
-                    manifest = await loadManifest();
-                    populateAgentTypesFromManifest(manifest);
-                    // keep existing static agent options as fallback if manifest absent
-                    agentTypeSelect.addEventListener('change', ()=>{
+                // Discover obstacle counts for selected agent
+                async function discoverObstacleCounts(agent) {
+                    clearSelect(obstacleCountSelect, '-- Loading obstacles... --');
+                    loadingMessage.textContent = 'Discovering obstacle levels...';
+                    
+                    try {
+                        // Load the CSV to discover available obstacle levels
+                        const response = await fetch(`${baseR2Url}results_summary.csv`);
+                        if (!response.ok) throw new Error('Cannot load results_summary.csv');
+                        
+                        const csvText = await response.text();
+                        const lines = csvText.trim().split('\n');
+                        
+                        if (lines.length < 2) {
+                            throw new Error('CSV file is empty');
+                        }
+                        
+                        const headers = lines[0].split(',').map(h => h.trim());
+                        const modelIndex = headers.indexOf('model');
+                        const levelIndex = headers.indexOf('level');
+                        
+                        if (modelIndex === -1 || levelIndex === -1) {
+                            throw new Error('Required columns not found in CSV');
+                        }
+                        
+                        // Extract unique obstacle levels for this agent
+                        const levels = new Set();
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim());
+                            if (values[modelIndex] === agent && values[levelIndex]) {
+                                levels.add(parseInt(values[levelIndex]));
+                            }
+                        }
+                        
+                        clearSelect(obstacleCountSelect, '-- Select Obstacle Count --');
+                        
+                        const levelsList = Array.from(levels).sort((a, b) => a - b);
+                        levelsList.forEach(count => {
+                            const opt = document.createElement('option');
+                            opt.value = count;
+                            opt.textContent = count + (count === 1 ? ' Obstacle' : ' Obstacles');
+                            obstacleCountSelect.appendChild(opt);
+                        });
+                        
+                        loadingMessage.textContent = `Found ${levelsList.length} obstacle level(s)`;
+                    } catch (e) {
+                        console.error('Error discovering obstacle counts:', e);
+                        clearSelect(obstacleCountSelect, '-- Select Obstacle Count --');
+                        loadingMessage.textContent = 'Error loading obstacle levels';
+                    }
+                    
+                    clearSelect(mapSelect, '-- Select Obstacle Count First --');
+                    updateButtonsState();
+                }
+
+                // Discover maps for selected agent and obstacle count
+                async function discoverMaps(agent, count) {
+                    clearSelect(mapSelect, '-- Loading maps... --');
+                    loadingMessage.textContent = 'Discovering available maps...';
+                    
+                    try {
+                        // Load the CSV to discover available maps
+                        const response = await fetch(`${baseR2Url}results_summary.csv`);
+                        if (!response.ok) throw new Error('Cannot load results_summary.csv');
+                        
+                        const csvText = await response.text();
+                        const lines = csvText.trim().split('\n');
+                        
+                        if (lines.length < 2) {
+                            throw new Error('CSV file is empty');
+                        }
+                        
+                        const headers = lines[0].split(',').map(h => h.trim());
+                        const modelIndex = headers.indexOf('model');
+                        const levelIndex = headers.indexOf('level');
+                        const mapIdIndex = headers.indexOf('map_id');
+                        
+                        if (modelIndex === -1 || levelIndex === -1 || mapIdIndex === -1) {
+                            throw new Error('Required columns not found in CSV');
+                        }
+                        
+                        // Extract unique maps for this agent and obstacle level
+                        const maps = new Set();
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim());
+                            if (values[modelIndex] === agent && parseInt(values[levelIndex]) === parseInt(count) && values[mapIdIndex]) {
+                                maps.add(`map_${values[mapIdIndex]}`);
+                            }
+                        }
+                        
+                        clearSelect(mapSelect, '-- Select Map --');
+                        
+                        const mapsList = Array.from(maps).sort((a, b) => {
+                            const numA = parseInt(a.split('_')[1]);
+                            const numB = parseInt(b.split('_')[1]);
+                            return numA - numB;
+                        });
+                        
+                        mapsList.forEach(map => {
+                            const opt = document.createElement('option');
+                            opt.value = map;
+                            opt.textContent = map.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            mapSelect.appendChild(opt);
+                        });
+                        
+                        loadingMessage.textContent = `Found ${mapsList.length} map(s)`;
+                    } catch (e) {
+                        console.error('Error discovering maps:', e);
+                        clearSelect(mapSelect, '-- Select Map --');
+                        loadingMessage.textContent = 'Error loading maps';
+                    }
+                    
+                    updateButtonsState();
+                }
+
+                function initDynamicUi() {
+                    // Load agents on initialization
+                    discoverAgents();
+                    
+                    // Agent type change handler
+                    agentTypeSelect.addEventListener('change', async () => {
                         const agent = agentTypeSelect.value;
+                        
                         if (!agent) {
-                            clearSelect(obstacleCountSelect,'-- Select Obstacle Count --');
-                            clearSelect(mapSelect,'-- Select Map --');
+                            clearSelect(obstacleCountSelect, '-- Select Agent First --');
+                            clearSelect(mapSelect, '-- Select Obstacle Count First --');
                             updateButtonsState();
                             return;
                         }
-                        populateObstacleCountsForAgent(agent);
-                        clearSelect(mapSelect,'-- Select Map --');
-                        updateButtonsState();
+                        
+                        await discoverObstacleCounts(agent);
                     });
-                    obstacleCountSelect.addEventListener('change', ()=>{
+                    
+                    // Obstacle count change handler
+                    obstacleCountSelect.addEventListener('change', async () => {
                         const agent = agentTypeSelect.value;
                         const count = obstacleCountSelect.value;
+                        
                         if (!agent || !count) {
-                            clearSelect(mapSelect,'-- Select Map --');
+                            clearSelect(mapSelect, '-- Select Obstacle Count First --');
                             updateButtonsState();
                             return;
                         }
-                        populateMapsForSelection(agent,count);
-                        updateButtonsState();
+                        
+                        await discoverMaps(agent, count);
                     });
-                    mapSelect.addEventListener('change', async ()=>{
+                    
+                    // Map selection change handler
+                    mapSelect.addEventListener('change', async () => {
                         updateButtonsState();
                         const agent = agentTypeSelect.value;
                         const count = obstacleCountSelect.value;
                         const map = mapSelect.value;
+                        
                         if (!agent || !count || !map) return;
-                        await loadMapMetadata(agent,count,map);
+                        await loadMapMetadata(agent, count, map);
                     });
+                    
                     updateButtonsState();
                 }
 
-                function updateButtonsState(){
-                    const ok = document.getElementById('agent-type').value && document.getElementById('obstacle-count').value && document.getElementById('map-select').value;
-                    document.getElementById('load-scene-btn').disabled = !ok;
-                    // run/stop remain disabled until a scene is loaded
+                function updateButtonsState() {
+                    const ok = agentTypeSelect.value && obstacleCountSelect.value && mapSelect.value;
+                    loadSceneBtn.disabled = !ok;
                 }
 
-                async function loadMapMetadata(agent,count,map){
+                async function loadMapMetadata(agent, count, map) {
                     const mdUrl = `${baseR2Url}${agent}/obstacles_${count}/${map}/map_metadata.json`;
                     loadingMessage.textContent = 'Loading map metadata...';
-                    try{
-                        const r = await fetch(mdUrl);
-                        if (!r.ok) throw new Error('metadata not found');
-                        const j = await r.json();
-                        const md = document.getElementById('metadata-display');
-                        md.style.display = 'block';
-                        md.innerHTML = `<pre style="white-space:pre-wrap; text-align:left;">${JSON.stringify(j,null,2)}</pre>`;
-                        loadingMessage.textContent = '';
-                        // enable run button now that metadata exists
-                        document.getElementById('run-simulation-btn').disabled = false;
-                        document.getElementById('stop-simulation-btn').disabled = false;
-                    }catch(e){
-                        loadingMessage.textContent = 'Could not load map metadata from R2.';
-                        console.warn('loadMapMetadata',e);
+                    
+                    try {
+                        const response = await fetch(mdUrl);
+                        if (!response.ok) throw new Error('Metadata not found');
+                        
+                        const metadata = await response.json();
+                        metadataDisplay.style.display = 'block';
+                        metadataDisplay.innerHTML = `<pre style="white-space:pre-wrap; text-align:left;">${JSON.stringify(metadata, null, 2)}</pre>`;
+                        loadingMessage.textContent = 'Map metadata loaded successfully';
+                        
+                        // Enable simulation buttons
+                        runSimulationBtn.disabled = false;
+                        stopSimulationBtn.disabled = false;
+                    } catch (e) {
+                        loadingMessage.textContent = 'Could not load map metadata';
+                        console.warn('loadMapMetadata error:', e);
+                        metadataDisplay.style.display = 'none';
                     }
                 }
 
-                // start dynamic UI initialization (non-blocking)
+                // Initialize dynamic UI
                 initDynamicUi();
                 
                 toggleBtn.addEventListener('click', function() {
@@ -1247,15 +1285,21 @@
                     }
                 });
                 
-                // Load and display comparison data
+                // Load and display comparison data from R2
                 async function loadComparisonData() {
                     const modalBody = document.getElementById('modal-body');
-                    modalBody.innerHTML = '<div class="loading-spinner"><p>Loading comparison data...</p></div>';
+                    modalBody.innerHTML = '<div class="loading-spinner"><p>Loading data from R2 storage...</p></div>';
                     
                     try {
-                        const response = await fetch('https://pub-9feba5102f904684b1adbddd1998b17d.r2.dev/Agents/results_summary.csv');
+                        const response = await fetch(`${baseR2Url}results_summary.csv`);
+                        if (!response.ok) throw new Error('Failed to load results_summary.csv');
+                        
                         const csvText = await response.text();
                         const data = parseCSV(csvText);
+                        
+                        if (data.length === 0) {
+                            throw new Error('No data found in results_summary.csv');
+                        }
                         
                         renderComparisonCharts(data);
                     } catch (error) {
@@ -1263,7 +1307,7 @@
                         modalBody.innerHTML = `
                             <div class="loading-spinner" style="color: #f44336;">
                                 <p>Error loading data: ${error.message}</p>
-                                <p>Please check your internet connection and try again.</p>
+                                <p>Please check your R2 storage and try again.</p>
                             </div>
                         `;
                     }
@@ -1272,11 +1316,13 @@
                 // Parse CSV data
                 function parseCSV(csvText) {
                     const lines = csvText.trim().split('\n');
-                    const headers = lines[0].split(',');
+                    if (lines.length < 2) return [];
+                    
+                    const headers = lines[0].split(',').map(h => h.trim());
                     const data = [];
                     
                     for (let i = 1; i < lines.length; i++) {
-                        const values = lines[i].split(',');
+                        const values = lines[i].split(',').map(v => v.trim());
                         const row = {};
                         headers.forEach((header, index) => {
                             row[header] = values[index];
@@ -1385,8 +1431,11 @@
                     
                     const datasets = models.map(model => {
                         const modelData = levels.map(level => {
-                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
-                            return row ? parseInt(row.number_of_steps) : null;
+                            // Calculate average steps for this model and level across all maps
+                            const levelData = data.filter(r => r.model === model && parseInt(r.level) === level);
+                            if (levelData.length === 0) return null;
+                            const avgSteps = levelData.reduce((sum, r) => sum + parseInt(r.number_of_steps), 0) / levelData.length;
+                            return Math.round(avgSteps);
                         });
                         
                         return {
@@ -1429,15 +1478,17 @@
                                             const dataIndex = context.dataIndex;
                                             const model = context.dataset.label.replace(' ', '_');
                                             const level = levels[dataIndex];
-                                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                                            const levelData = data.filter(r => r.model === model && parseInt(r.level) === level);
                                             
-                                            if (!row) return '';
+                                            if (levelData.length === 0) return '';
+                                            
+                                            const avgSteps = levelData.reduce((sum, r) => sum + parseInt(r.number_of_steps), 0) / levelData.length;
+                                            const successCount = levelData.filter(r => r.goal_reached === 'True').length;
                                             
                                             const lines = [
-                                                `${context.dataset.label}: ${context.parsed.y} steps`,
-                                                `Goal Reached: ${row.goal_reached === 'True' ? '✓' : '✗'}`,
-                                                `Collision: ${row.collision === 'True' ? 'Yes' : 'No'}`,
-                                                `Out of Bounds: ${row.out_of_bound === 'True' ? 'Yes' : 'No'}`
+                                                `${context.dataset.label}: ${Math.round(avgSteps)} avg steps`,
+                                                `Maps: ${levelData.length}`,
+                                                `Success: ${successCount}/${levelData.length}`
                                             ];
                                             return lines;
                                         }
@@ -1549,8 +1600,11 @@
                     
                     const datasets = models.map(model => {
                         const modelData = levels.map(level => {
-                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
-                            return row ? parseInt(row.number_of_steps) : null;
+                            // Calculate average steps for this model and level across all maps
+                            const levelData = data.filter(r => r.model === model && parseInt(r.level) === level);
+                            if (levelData.length === 0) return null;
+                            const avgSteps = levelData.reduce((sum, r) => sum + parseInt(r.number_of_steps), 0) / levelData.length;
+                            return Math.round(avgSteps);
                         });
                         
                         return {
@@ -1587,14 +1641,18 @@
                                             const dataIndex = context.dataIndex;
                                             const model = context.dataset.label.replace(' ', '_');
                                             const level = levels[dataIndex];
-                                            const row = data.find(r => r.model === model && parseInt(r.level) === level);
+                                            const levelData = data.filter(r => r.model === model && parseInt(r.level) === level);
                                             
-                                            if (!row) return '';
+                                            if (levelData.length === 0) return '';
+                                            
+                                            const successCount = levelData.filter(r => r.goal_reached === 'True').length;
+                                            const collisionCount = levelData.filter(r => r.collision === 'True').length;
                                             
                                             return [
-                                                `${context.dataset.label}: ${context.parsed.y} steps`,
-                                                `Goal: ${row.goal_reached === 'True' ? '✓ Reached' : '✗ Failed'}`,
-                                                `Status: ${row.collision === 'True' ? 'Collision' : row.out_of_bound === 'True' ? 'Out of Bounds' : 'Clean'}`
+                                                `${context.dataset.label}: ${context.parsed.y} avg steps`,
+                                                `Maps: ${levelData.length}`,
+                                                `Success: ${successCount}/${levelData.length}`,
+                                                `Collisions: ${collisionCount}`
                                             ];
                                         }
                                     }
